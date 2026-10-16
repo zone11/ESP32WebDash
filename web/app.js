@@ -249,7 +249,7 @@ function pageDashboard(view) {
 
   const info = el('dl', { class: 'kv' });
   const sys = () => api.req('GET', '/api/system').then(s => info.replaceChildren(
-    ...[['Firmware', s.firmware], ['IP', s.ip], ['WiFi', s.ssid + ' (' + s.rssi + ' dBm)'],
+    ...[['Firmware', s.firmware], ['IP', s.ip], ...ip6(s), ['WiFi', s.ssid + ' (' + s.rssi + ' dBm)'],
         ['Uptime', fmtUptime(s.uptime)], ['Free heap', Math.round(s.heap / 1024) + ' KB']]
       .flatMap(([k, v]) => [el('dt', null, k), el('dd', null, v)]))).catch(() => {});
   sys();
@@ -381,10 +381,12 @@ function pageSettings(view) {
 }
 
 // ---------- system ----------
+const ip6 = s => (s.ipv6 || []).map((a, i) => [i ? '' : 'IPv6', a]);
+
 function pageSystem(view) {
   const info = el('dl', { class: 'kv' });
   api.req('GET', '/api/system').then(s => info.replaceChildren(
-    ...[['Device', s.name], ['Firmware', s.firmware], ['Chip', s.chip], ['MAC', s.mac], ['IP', s.ip],
+    ...[['Device', s.name], ['Firmware', s.firmware], ['Chip', s.chip], ['MAC', s.mac], ['IP', s.ip], ...ip6(s),
         ['WiFi', s.ssid + ' (' + s.rssi + ' dBm)'], ['Uptime', fmtUptime(s.uptime)],
         ['Heap', Math.round(s.heap / 1024) + ' KB free'], ['PSRAM', Math.round(s.psram / 1024) + ' KB free'],
         ['Filesystem', Math.round(s.fsUsed / 1024) + ' / ' + Math.round(s.fsTotal / 1024) + ' KB']]

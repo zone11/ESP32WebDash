@@ -249,6 +249,7 @@ class ESP32WebDash {
   void valuesSnapshot(JsonDocument& doc, bool onlyDirty);
   void broadcast(const JsonDocument& doc);
   void startWifi();
+  std::vector<String> ipv6Addresses() const;
   void wifiTick();
   void startAp();
   void stopAp();
@@ -267,6 +268,7 @@ class ESP32WebDash {
   std::vector<std::unique_ptr<Value>> values_;
   std::vector<std::unique_ptr<Action>> actions_;
   Setting *hostname_ = nullptr, *ssid_ = nullptr, *pass_ = nullptr;
+  Setting *ipv6_ = nullptr;
   Setting *apFallback_ = nullptr, *apPass_ = nullptr, *authOn_ = nullptr, *authPass_ = nullptr;
   volatile bool anyDirty_ = false;
   bool started_ = false;

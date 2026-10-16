@@ -22,6 +22,16 @@ void ESP32WebDash::startWifi() {
     staWarned_ = false;
     log('I', "WiFi connected: http://%s  (http://%s.local)", WiFi.localIP().toString().c_str(), host.c_str());
   }, ARDUINO_EVENT_WIFI_STA_GOT_IP);
+  if (ipv6_->asBool()) {
+    WiFi.onEvent([this](WiFiEvent_t, WiFiEventInfo_t) {
+      for (const String& a : ipv6Addresses()) log('I', "IPv6 address: %s", a.c_str());
+    }, ARDUINO_EVENT_WIFI_STA_GOT_IP6);
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+    WiFi.STA.enableIPv6(true);
+#else
+    WiFi.enableIpV6();
+#endif
+  }
   WiFi.onEvent([this](WiFiEvent_t, WiFiEventInfo_t info) {
     if (staWarned_) return;  // retries fail every few seconds; report once per outage
     staWarned_ = true;
@@ -33,6 +43,20 @@ void ESP32WebDash::startWifi() {
   else log('W', "no WiFi configured");
   staLostAt_ = millis();
   if (MDNS.begin(host.c_str())) MDNS.addService("http", "tcp", cfg_.port);
+}
+
+// Link-local and global addresses of the station interface (empty while IPv6 is off).
+std::vector<String> ESP32WebDash::ipv6Addresses() const {
+  std::vector<String> out;
+  if (!ipv6_->asBool() || WiFi.status() != WL_CONNECTED) return out;
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+  for (IPAddress a : {WiFi.STA.linkLocalIPv6(), WiFi.STA.globalIPv6()})
+    if (a != IPAddress(IPv6)) out.push_back(a.toString());
+#else
+  IPv6Address a = WiFi.localIPv6();
+  if (a.toString() != "0000:0000:0000:0000:0000:0000:0000:0000") out.push_back(a.toString());
+#endif
+  return out;
 }
 
 void ESP32WebDash::startAp() {

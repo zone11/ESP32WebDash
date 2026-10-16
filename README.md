@@ -7,7 +7,7 @@ actions in a few lines of C++, and a generic web UI renders them, with no HTML p
 - **Live values** pushed over WebSocket: numbers with meters, text, on/off, **LED** (color + dim), **PWM** (%)
 - **Actions** (buttons) run on a worker task and never block the web server or your code
 - **OTA** for firmware and web UI, with a built-in recovery page at `/update`
-- **Setup hotspot** with captive portal when WiFi is unreachable, mDNS (`<hostname>.local`)
+- **Setup hotspot** with captive portal when WiFi is unreachable, mDNS (`<hostname>.local`), optional IPv6
 - **Optional login** (HTTP Basic, user `admin`) and a **live log console**
 - The UI (≈12 KB gzipped, no external dependencies) lives on LittleFS; restyle it with CSS tokens
 
@@ -110,7 +110,7 @@ IDs are NVS keys: at most 15 characters, unique. Values are loaded when the sett
 usable in `setup()` right away. `onChange` runs on the worker task after a change from the UI, an import, a
 reset or `set()`.
 
-The library adds a **Network** group (hostname, WiFi, setup hotspot) and a **Security** group (login).
+The library adds a **Network** group (hostname, WiFi, IPv6, setup hotspot) and a **Security** group (login).
 
 ### Values
 
@@ -198,3 +198,5 @@ The main tokens (defined in `web/core.css`, dark values on `:root`, light ones o
 
 The login uses HTTP Basic auth over plain HTTP: it keeps casual users out of a trusted network, nothing more.
 The setup hotspot is open unless a hotspot password is set. Settings exports contain passwords in plain text.
+IPv6 is off by default: with it on, the device gets a global address (SLAAC) and is reachable from outside
+the local network unless the router's firewall blocks incoming connections. The setup hotspot stays IPv4-only.
