@@ -44,6 +44,11 @@ const ICONS = {
   bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
   fan: '<circle cx="12" cy="12" r="1.5"/><path d="M12 10.5c0-4 1-7 4-7s3 4-2.5 7.2M13.5 12c4 0 7 1 7 4s-4 3-7.2-2.5M12 13.5c0 4-1 7-4 7s-3-4 2.5-7.2M10.5 12c-4 0-7-1-7-4s4-3 7.2 2.5"/>',
   led: '<circle cx="12" cy="10" r="5"/><path d="M10 15v6M14 15v6"/>',
+  wave: '<path d="M2 12c1.5-4 3.5-4 5 0s3.5 4 5 0 3.5-4 5 0 3.5 4 5 0"/>',
+  antenna: '<circle cx="12" cy="8" r="1.5"/><path d="M12 10v11M9 21h6"/><path d="M8 4.5a5 5 0 0 0 0 7M16 4.5a5 5 0 0 1 0 7M5 2a9 9 0 0 0 0 12M19 2a9 9 0 0 1 0 12"/>',
+  sliders: '<path d="M5 4v16M12 4v16M19 4v16"/><path d="M3 15h4M10 8h4M17 13h4"/>',
+  plug: '<path d="M9 2v5M15 2v5"/><path d="M6 7h12v4a6 6 0 0 1-12 0z"/><path d="M12 17v5"/>',
+  server: '<rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01"/>',
 };
 function sprite() {
   const syms = Object.entries(ICONS).map(([k, p]) => `<symbol id="i-${k}" viewBox="0 0 24 24">${p}</symbol>`).join('');

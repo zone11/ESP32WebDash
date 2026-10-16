@@ -127,7 +127,7 @@ Modifiers: `.unit()`, `.icon()`, `.decimals()`. Setters are thread-safe and chea
 pushed to the browser (default every second).
 
 Icons: `temp`, `hum`, `wifi`, `chip`, `clock`, `bolt`, `gauge`, `power`, `play`, `refresh`, `fan`, `led`,
-`bell`, `dot`, `download`, `upload`, `copy`, `trash`.
+`bell`, `dot`, `download`, `upload`, `copy`, `trash`, `wave`, `antenna`, `sliders`, `plug`, `server`.
 
 ### Actions
 

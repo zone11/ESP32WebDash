@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- New icons: `wave`, `antenna`, `sliders`, `plug`, `server`.
+
 ## 0.1.2
 
 - Multi-line text settings: `addText(...).multiline(rows)` shows a full-width text box that keeps line
