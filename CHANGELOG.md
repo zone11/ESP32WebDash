@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.3
 
 - New icons: `wave`, `antenna`, `sliders`, `plug`, `server`.
 
