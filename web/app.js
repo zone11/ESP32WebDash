@@ -300,6 +300,11 @@ function control(def, value, onChange) {
       return { node: el('span', { class: 'cpick' }, c, hex), put: v => { c.value = v; hex.textContent = v; } };
     }
     default: {
+      if (def.rows) {
+        const a = el('textarea', { rows: def.rows, maxlength: def.max, placeholder: def.placeholder, spellcheck: 'false', 'aria-label': def.label });
+        a.value = value ?? ''; a.addEventListener('input', () => set(a.value));
+        return { node: a, put: v => a.value = v ?? '' };
+      }
       const t = el('input', { type: def.type === 'password' ? 'password' : 'text', maxlength: def.max, placeholder: def.placeholder,
         autocomplete: def.type === 'password' ? 'new-password' : 'off', 'aria-label': def.label });
       t.value = value ?? ''; t.addEventListener('input', () => set(t.value));
@@ -341,7 +346,7 @@ function pageSettings(view) {
     sub.append(el('a', { onclick: () => document.getElementById(sid).scrollIntoView({ behavior: 'smooth' }) }, g.title));
     const list = el('div', { class: 'rows' });
     for (const def of g.items) {
-      const row = el('div', { class: 'frow' });
+      const row = el('div', { class: def.rows ? 'frow wide' : 'frow' });
       const ctl = control(def, S.settings[def.id], v => {
         if (v === S.settings[def.id]) dirty.delete(def.id); else dirty.set(def.id, v);
         row.classList.toggle('dirty', dirty.has(def.id)); upd();

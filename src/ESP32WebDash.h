@@ -47,6 +47,9 @@ class Setting {
   Setting& step(double s) { step_ = s; return *this; }
   Setting& maxLength(uint16_t n) { maxLen_ = n; return *this; }
   Setting& placeholder(const char* text) { placeholder_ = text; return *this; }
+  // Text only: multi-line box with this many visible rows (keeps line breaks, e.g. for a PEM certificate).
+  // NVS stores at most ~4000 bytes per string, so keep maxLength() below that.
+  Setting& multiline(uint8_t rows = 6) { rows_ = rows; return *this; }
   // Changing this setting only takes effect after a restart (UI shows a hint).
   Setting& requiresRestart(bool on = true) { reboot_ = on; return *this; }
   // Called on the worker task after the value changed (web UI, import, reset or set()).
@@ -77,6 +80,7 @@ class Setting {
   String id_, label_, group_, help_, unit_, placeholder_;
   double min_ = 0, max_ = 0, step_ = 0;
   uint16_t maxLen_ = 64;
+  uint8_t rows_ = 0;
   bool reboot_ = false;
   std::vector<std::pair<String, String>> options_;
   Callback onChange_;

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Multi-line text settings: `addText(...).multiline(rows)` shows a full-width text box that keeps line
+  breaks, e.g. for pasting a PEM certificate.
+
 ## 0.1.1
 
 - Optional IPv6 (setting `ipv6` in the Network group, off by default): link-local and global addresses are

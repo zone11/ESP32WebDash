@@ -144,6 +144,9 @@ main>.wide{grid-column:1/-1}
 .frow .ctl input[type=text],.frow .ctl input[type=password],.frow .ctl select{width:240px}
 .frow .ctl input[type=number]{width:120px}
 .frow .ctl input[type=range]{width:180px}
+.frow.wide{grid-template-columns:minmax(0,1fr)}
+.frow.wide .ctl{justify-content:stretch}
+.frow .ctl textarea{width:100%;min-height:38px;padding:8px 10px;font:12px/1.45 var(--mono);resize:vertical}
 .frow .val{font:12px var(--mono);color:var(--dim);min-width:40px;text-align:right}
 .frow.dirty .lab b::after{content:"";display:inline-block;width:6px;height:6px;margin-left:7px;border-radius:50%;background:var(--acc);vertical-align:middle}
 .tag{font:600 10px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line);border-radius:3px;padding:0 5px;margin-left:6px}

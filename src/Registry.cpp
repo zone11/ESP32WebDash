@@ -362,6 +362,7 @@ void ESP32WebDash::schemaJson(JsonDocument& doc) const {
       if (isNumeric(s->type_) && s->type_ != SettingType::Bool && s->min_ != s->max_) { o["min"] = s->min_; o["max"] = s->max_; }
       if (s->step_ > 0) o["step"] = s->step_;
       if (s->type_ == SettingType::Text || s->type_ == SettingType::Password) o["max"] = s->maxLen_;
+      if (s->type_ == SettingType::Text && s->rows_) o["rows"] = s->rows_;
       if (!s->options_.empty()) {
         JsonArray opts = o["options"].to<JsonArray>();
         for (auto& op : s->options_) { JsonArray p = opts.add<JsonArray>(); p.add(op.first); p.add(op.second); }

@@ -98,7 +98,7 @@ A complete example is in [`examples/Greenhouse`](examples/Greenhouse).
 | `addInt(id, label, def, min, max)` | number | `.unit()` `.step()` |
 | `addFloat(id, label, def, min, max)` | number | `.step(0.1)` |
 | `addSlider(id, label, def, min, max)` | range slider | |
-| `addText(id, label, def)` | text | `.maxLength(n)` (default 64) `.placeholder()` |
+| `addText(id, label, def)` | text | `.maxLength(n)` (default 64) `.placeholder()` `.multiline(rows)` (text box that keeps line breaks; NVS stores up to ~4000 bytes) |
 | `addPassword(id, label, def)` | password | shown masked, never sent to the browser; included in export |
 | `addSelect(id, label, def, {{value, label}, ...})` | dropdown | |
 | `addColor(id, label, "#rrggbb")` | color picker | |
