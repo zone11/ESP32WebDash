@@ -1,0 +1,9 @@
+# ESP32WebDash, 4 MB flash: 2 x 1.5 MB app (OTA), 64 KB NVS, 832 KB LittleFS
+# otadata must stay at 0xe000: PlatformIO writes boot_app0.bin there on every upload.
+# Name,   Type, SubType, Offset,   Size
+otadata,  data, ota,     0xe000,   0x2000
+nvs,      data, nvs,     0x10000,  0x10000
+app0,     app,  ota_0,   0x20000,  0x180000
+app1,     app,  ota_1,   0x1A0000, 0x180000
+spiffs,   data, spiffs,  0x320000, 0xD0000
+coredump, data, coredump,0x3F0000, 0x10000
