@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.1
 
 - Optional IPv6 (setting `ipv6` in the Network group, off by default): link-local and global addresses are
   logged and shown on the dashboard and System page.

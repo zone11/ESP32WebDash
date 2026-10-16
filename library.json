@@ -1,6 +1,6 @@
 {
   "name": "ESP32WebDash",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Schema-driven web UI for ESP32: settings in NVS with JSON import/export, live values over WebSocket, actions, OTA, setup hotspot, login and log console. UI assets on LittleFS.",
   "keywords": "esp32, web, ui, settings, nvs, littlefs, websocket, ota, captive portal",
   "authors": [{ "name": "Christian Egger", "maintainer": true }],
