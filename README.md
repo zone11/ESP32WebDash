@@ -100,10 +100,12 @@ A complete example is in [`examples/Greenhouse`](examples/Greenhouse).
 | `addSlider(id, label, def, min, max)` | range slider | |
 | `addText(id, label, def)` | text | `.maxLength(n)` (default 64) `.placeholder()` `.multiline(rows)` (text box that keeps line breaks; NVS stores up to ~4000 bytes) |
 | `addPassword(id, label, def)` | password | shown masked, never sent to the browser; included in export |
-| `addSelect(id, label, def, {{value, label}, ...})` | dropdown | |
+| `addSelect(id, label, def, {{value, label}, ...})` | dropdown | options can also be a `std::vector<std::pair<String, String>>` |
 | `addColor(id, label, "#rrggbb")` | color picker | |
 
-`ui.group(title, help)` starts a section; settings added after it belong to it.
+`ui.group(title, help)` starts a section; settings added after it belong to it. `.showWhen("mode", "night")`
+after `group()` shows that section only while setting `mode` has the value `night` (also while the change is still
+unsaved).
 Modifiers: `.help(text)`, `.requiresRestart()`, `.onChange([](Setting& s) { ... })`.
 Read with `asBool()`, `asInt()`, `asFloat()`, `asString()`; write with `set(...)`.
 IDs are NVS keys: at most 15 characters, unique. Values are loaded when the setting is added, so they are

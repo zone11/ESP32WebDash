@@ -327,7 +327,13 @@ function pageSettings(view) {
     el('span', null, count, ' unsaved'), el('span', { class: 'grow' }),
     el('button', { class: 'ghost', onclick: discard }, 'Discard'),
     el('button', { class: 'pri', onclick: save }, 'Save'));
-  const upd = () => { count.textContent = dirty.size; savebar.hidden = !dirty.size; };
+  const upd = () => { count.textContent = dirty.size; savebar.hidden = !dirty.size; applyWhen(); };
+  // groups with "when" are shown only while that setting (incl. an unsaved change) has the given value
+  const conditional = [];
+  const applyWhen = () => conditional.forEach(({ when, sec, link }) => {
+    const v = dirty.has(when.id) ? dirty.get(when.id) : S.settings[when.id];
+    sec.hidden = link.hidden = String(v) !== String(when.value);
+  });
 
   function discard() {
     for (const [id] of dirty) { const r = rows.get(id); r.ctl.put(S.settings[id]); r.row.classList.remove('dirty'); }
@@ -348,7 +354,8 @@ function pageSettings(view) {
   const panel = el('div', { class: 'panel' });
   groups.forEach((g, gi) => {
     const sid = 'sec-' + gi;
-    sub.append(el('a', { onclick: () => document.getElementById(sid).scrollIntoView({ behavior: 'smooth' }) }, g.title));
+    const link = el('a', { onclick: () => document.getElementById(sid).scrollIntoView({ behavior: 'smooth' }) }, g.title);
+    sub.append(link);
     const list = el('div', { class: 'rows' });
     for (const def of g.items) {
       const row = el('div', { class: def.rows ? 'frow wide' : 'frow' });
@@ -363,9 +370,12 @@ function pageSettings(view) {
       rows.set(def.id, { row, ctl });
       list.append(row);
     }
-    panel.append(el('section', { class: 'section', id: sid },
-      el('header', null, el('h2', null, g.title), g.help ? el('div', { class: 'help' }, g.help) : null), list));
+    const sec = el('section', { class: 'section', id: sid },
+      el('header', null, el('h2', null, g.title), g.help ? el('div', { class: 'help' }, g.help) : null), list);
+    if (g.when) conditional.push({ when: g.when, sec, link });
+    panel.append(sec);
   });
+  applyWhen();
 
   // highlight current section in subnav
   const io = new IntersectionObserver(es => es.forEach(e => {
@@ -378,6 +388,7 @@ function pageSettings(view) {
 
   const onSettings = changed => {
     for (const [id, v] of Object.entries(changed)) if (rows.has(id) && !dirty.has(id)) rows.get(id).ctl.put(v);
+    applyWhen();
   };
   S.settingListeners.add(onSettings);
   cleanup.push(() => S.settingListeners.delete(onSettings));

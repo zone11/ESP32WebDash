@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- `showWhen(settingId, value)`: show a settings group only while another setting has a given value.
+- `addSelect()` also takes the options as a `std::vector` (for lists built at runtime).
+
 ## 0.1.3
 
 - New icons: `wave`, `antenna`, `sliders`, `plug`, `server`.

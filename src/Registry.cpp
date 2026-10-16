@@ -102,7 +102,14 @@ void Value::toJson(JsonObject obj) const {
 // ---------------------------------------------------------------- registration
 
 ESP32WebDash& ESP32WebDash::group(const char* title, const char* help) {
-  groups_.push_back({title, help ? help : ""});
+  groups_.push_back({title, help ? help : "", "", ""});
+  return *this;
+}
+
+ESP32WebDash& ESP32WebDash::showWhen(const char* settingId, const char* value) {
+  if (groups_.empty()) group("Settings");
+  groups_.back().whenId = settingId;
+  groups_.back().whenValue = value;
   return *this;
 }
 
@@ -141,6 +148,12 @@ Setting& ESP32WebDash::addSelect(const char* id, const char* label, const char* 
                                    std::initializer_list<std::pair<const char*, const char*>> options) {
   Setting& s = addSetting(SettingType::Select, id, label);
   for (auto& o : options) s.options_.emplace_back(o.first, o.second);
+  s.defStr_ = def; load(s); return s;
+}
+Setting& ESP32WebDash::addSelect(const char* id, const char* label, const char* def,
+                                   const std::vector<std::pair<String, String>>& options) {
+  Setting& s = addSetting(SettingType::Select, id, label);
+  s.options_ = options;
   s.defStr_ = def; load(s); return s;
 }
 Setting& ESP32WebDash::addColor(const char* id, const char* label, const char* def) {
@@ -351,6 +364,7 @@ void ESP32WebDash::schemaJson(JsonDocument& doc) const {
         go = groups.add<JsonObject>();
         go["title"] = g.title;
         if (g.help.length()) go["help"] = g.help;
+        if (g.whenId.length()) { go["when"]["id"] = g.whenId; go["when"]["value"] = g.whenValue; }
         go["items"].to<JsonArray>();
       }
       JsonObject o = go["items"].as<JsonArray>().add<JsonObject>();

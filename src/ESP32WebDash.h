@@ -180,6 +180,9 @@ class ESP32WebDash {
 
   // Settings added after group() belong to it (shown as one section).
   ESP32WebDash& group(const char* title, const char* help = nullptr);
+  // Shows the current group only while setting `settingId` has `value` (e.g. a select). The settings stay
+  // stored, exported and readable while hidden.
+  ESP32WebDash& showWhen(const char* settingId, const char* value);
   Setting& addBool(const char* id, const char* label, bool def = false);
   Setting& addInt(const char* id, const char* label, int32_t def, int32_t min, int32_t max);
   Setting& addFloat(const char* id, const char* label, double def, double min, double max);
@@ -188,6 +191,9 @@ class ESP32WebDash {
   Setting& addPassword(const char* id, const char* label, const char* def = "");
   Setting& addSelect(const char* id, const char* label, const char* def,
                      std::initializer_list<std::pair<const char*, const char*>> options);
+  // Same, for option lists built at runtime (value, label).
+  Setting& addSelect(const char* id, const char* label, const char* def,
+                     const std::vector<std::pair<String, String>>& options);
   Setting& addColor(const char* id, const char* label, const char* def = "#3d9fb0");
 
   Value& addValue(const char* id, const char* label);   // number
@@ -227,7 +233,7 @@ class ESP32WebDash {
   friend class Value;
   friend class Lock;
 
-  struct Group { String title, help; };
+  struct Group { String title, help, whenId, whenValue; };
 
   Setting& addSetting(SettingType t, const char* id, const char* label);
   void load(Setting& s);
