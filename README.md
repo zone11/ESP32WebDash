@@ -26,7 +26,7 @@ board = esp32-s3-devkitc-1
 board_build.filesystem = littlefs
 board_build.partitions = partitions.csv        ; copy one from partitions/ (see below)
 lib_deps =
-    https://github.com/zone11/ESP32WebDash.git#v0.1.3
+    https://github.com/zone11/ESP32WebDash.git#v0.1.4
 ```
 
 **2. Partition table.** OTA needs two app slots plus a data partition for the UI. Copy the matching file from

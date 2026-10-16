@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.4
 
 - `showWhen(settingId, value)`: show a settings group only while another setting has a given value.
 - `addSelect()` also takes the options as a `std::vector` (for lists built at runtime).
