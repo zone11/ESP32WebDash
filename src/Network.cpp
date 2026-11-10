@@ -5,6 +5,9 @@
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
 #include <WiFi.h>
+#if WEBDASH_IPV6
+#include <esp_netif.h>
+#endif
 
 namespace webdash {
 
@@ -21,7 +24,15 @@ void ESP32WebDash::startWifi() {
   WiFi.onEvent([this, host](WiFiEvent_t, WiFiEventInfo_t) {
     staWarned_ = false;
     log('I', "WiFi connected: http://%s  (http://%s.local)", WiFi.localIP().toString().c_str(), host.c_str());
+#if WEBDASH_IPV6
+    // DHCP has just written its DNS server to slot 0; Router Advertisements overwrite it later.
+    esp_netif_dns_info_t d;
+    esp_netif_t* sta = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    dns4_ = sta && esp_netif_get_dns_info(sta, ESP_NETIF_DNS_MAIN, &d) == ESP_OK &&
+            d.ip.type == ESP_IPADDR_TYPE_V4 ? d.ip.u_addr.ip4.addr : 0;
+#endif
   }, ARDUINO_EVENT_WIFI_STA_GOT_IP);
+#if WEBDASH_IPV6
   if (ipv6_->asBool()) {
     WiFi.onEvent([this](WiFiEvent_t, WiFiEventInfo_t) {
       for (const String& a : ipv6Addresses()) log('I', "IPv6 address: %s", a.c_str());
@@ -32,7 +43,10 @@ void ESP32WebDash::startWifi() {
     WiFi.enableIpV6();
 #endif
   }
+  WiFi.onEvent([this](WiFiEvent_t, WiFiEventInfo_t) { dns4_ = 0; }, ARDUINO_EVENT_WIFI_STA_LOST_IP);
+#endif
   WiFi.onEvent([this](WiFiEvent_t, WiFiEventInfo_t info) {
+    dns4_ = 0;
     if (staWarned_) return;  // retries fail every few seconds; report once per outage
     staWarned_ = true;
     log('W', "WiFi disconnected (reason %u), retrying", info.wifi_sta_disconnected.reason);
@@ -48,6 +62,7 @@ void ESP32WebDash::startWifi() {
 // Link-local and global addresses of the station interface (empty while IPv6 is off).
 std::vector<String> ESP32WebDash::ipv6Addresses() const {
   std::vector<String> out;
+#if WEBDASH_IPV6
   if (!ipv6_->asBool() || WiFi.status() != WL_CONNECTED) return out;
 #if ESP_ARDUINO_VERSION_MAJOR >= 3
   for (IPAddress a : {WiFi.STA.linkLocalIPv6(), WiFi.STA.globalIPv6()})
@@ -56,8 +71,27 @@ std::vector<String> ESP32WebDash::ipv6Addresses() const {
   IPv6Address a = WiFi.localIPv6();
   if (a.toString() != "0000:0000:0000:0000:0000:0000:0000:0000") out.push_back(a.toString());
 #endif
+#endif
   return out;
 }
+
+#if WEBDASH_IPV6
+// lwIP writes RDNSS servers from every Router Advertisement into DNS slots 0 and 1, replacing the
+// DHCP server; if those resolvers are unreachable, all lookups fail. Put the DHCP server back first.
+void ESP32WebDash::keepDns4First() {
+  esp_netif_t* sta = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+  esp_netif_dns_info_t main;
+  if (!sta || esp_netif_get_dns_info(sta, ESP_NETIF_DNS_MAIN, &main) != ESP_OK) return;
+  if (main.ip.type == ESP_IPADDR_TYPE_V4 && main.ip.u_addr.ip4.addr == dns4_) return;
+  esp_netif_dns_info_t v4 = {};
+  v4.ip.type = ESP_IPADDR_TYPE_V4;
+  v4.ip.u_addr.ip4.addr = dns4_;
+  if (esp_netif_set_dns_info(sta, ESP_NETIF_DNS_MAIN, &v4) != ESP_OK) return;
+  if (main.ip.type == ESP_IPADDR_TYPE_V6) esp_netif_set_dns_info(sta, ESP_NETIF_DNS_BACKUP, &main);
+  if (!dnsFixLogged_) log('I', "IPv6: keeping IPv4 DNS %s first", IPAddress(dns4_).toString().c_str());
+  dnsFixLogged_ = true;
+}
+#endif
 
 void ESP32WebDash::startAp() {
   String ssid = hostname();
@@ -90,6 +124,9 @@ void ESP32WebDash::wifiTick() {
   if (up) {
     if (!staUpAt_) staUpAt_ = now;
     staLostAt_ = 0;
+#if WEBDASH_IPV6
+    if (dns4_ && ipv6_->asBool()) keepDns4First();
+#endif
     if (apActive_ && now - staUpAt_ > AP_LINGER_MS && WiFi.softAPgetStationNum() == 0) stopAp();
     return;
   }

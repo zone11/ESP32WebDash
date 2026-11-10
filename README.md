@@ -8,6 +8,7 @@ actions in a few lines of C++, and a generic web UI renders them, with no HTML p
 - **Actions** (buttons) run on a worker task and never block the web server or your code
 - **OTA** for firmware and web UI, with a built-in recovery page at `/update`
 - **Setup hotspot** with captive portal when WiFi is unreachable, mDNS (`<hostname>.local`), optional IPv6
+  (build flag `-DWEBDASH_IPV6=1`)
 - **Optional login** (HTTP Basic, user `admin`) and a **live log console**
 - The UI (≈12 KB gzipped, no external dependencies) lives on LittleFS; restyle it with CSS tokens
 
@@ -113,6 +114,8 @@ usable in `setup()` right away. `onChange` runs on the worker task after a chang
 reset or `set()`.
 
 The library adds a **Network** group (hostname, WiFi, IPv6, setup hotspot) and a **Security** group (login).
+The IPv6 switch exists only in builds with `-DWEBDASH_IPV6=1`; without the flag `ui.setting("ipv6")` returns
+`nullptr`, so check for it before calling `asBool()`.
 
 ### Values
 
@@ -153,6 +156,12 @@ cfg.apFallbackMs = 20000;    // open the setup hotspot after this long without W
 cfg.logLines = 200;          // log history for the web console
 cfg.workerStack = 6144;      // stack of the worker task (onChange, actions)
 ui.config(cfg);              // before begin()
+```
+
+IPv6 is a build option, off by default. With it, the Network group gets an `ipv6` switch (off until turned on):
+
+```ini
+build_flags = -DWEBDASH_IPV6=1
 ```
 
 ## HTTP API
@@ -200,5 +209,7 @@ The main tokens (defined in `web/core.css`, dark values on `:root`, light ones o
 
 The login uses HTTP Basic auth over plain HTTP: it keeps casual users out of a trusted network, nothing more.
 The setup hotspot is open unless a hotspot password is set. Settings exports contain passwords in plain text.
-IPv6 is off by default: with it on, the device gets a global address (SLAAC) and is reachable from outside
-the local network unless the router's firewall blocks incoming connections. The setup hotspot stays IPv4-only.
+IPv6 needs the build flag `-DWEBDASH_IPV6=1` and is off by default even then: with it on, the device gets a
+global address (SLAAC) and is reachable from outside the local network unless the router's firewall blocks
+incoming connections. The setup hotspot stays IPv4-only. The DNS server from DHCP stays the primary resolver;
+IPv6 resolvers announced by the router are only kept as fallback.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5
+
+- **Behaviour change:** IPv6 is now a build option, off by default. Without `-DWEBDASH_IPV6=1` there is no
+  `ipv6` setting (`ui.setting("ipv6")` returns `nullptr`) and IPv6 is never enabled. Projects that use the
+  setting must add the flag. A stored `ipv6` value is ignored, and importing it is reported as skipped.
+- Fix: with IPv6 on, DNS servers from Router Advertisements no longer replace the DHCP DNS server, which
+  broke all name resolution when those resolvers were unreachable. The DHCP server stays first.
+
 ## 0.1.4
 
 - `showWhen(settingId, value)`: show a settings group only while another setting has a given value.

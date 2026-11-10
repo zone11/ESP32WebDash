@@ -147,8 +147,10 @@ void ESP32WebDash::begin() {
                    .help("Name on the network and of the setup hotspot; reachable as <hostname>.local.");
   ssid_ = &addText("wifi_ssid", "WiFi name", defSsid_.c_str()).maxLength(32).requiresRestart();
   pass_ = &addPassword("wifi_pass", "WiFi password", defPass_.c_str()).maxLength(64).requiresRestart();
+#if WEBDASH_IPV6
   ipv6_ = &addBool("ipv6", "IPv6", false).requiresRestart()
                .help("Also get IPv6 addresses from the router. The device may then be reachable beyond the local network if the router allows it.");
+#endif
   apFallback_ = &addBool("ap_fallback", "Setup hotspot", true)
                      .help("Opens a WiFi hotspot with this page when the network is unreachable.");
   apPass_ = &addPassword("ap_pass", "Hotspot password").maxLength(64)

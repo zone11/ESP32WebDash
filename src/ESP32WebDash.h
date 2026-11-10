@@ -22,6 +22,11 @@
 #include <memory>
 #include <vector>
 
+// Build with -DWEBDASH_IPV6=1 to add the `ipv6` setting (off by default at runtime too).
+#ifndef WEBDASH_IPV6
+#define WEBDASH_IPV6 0
+#endif
+
 class AsyncWebServer;
 class AsyncWebSocket;
 class AsyncWebServerRequest;
@@ -261,6 +266,7 @@ class ESP32WebDash {
   void startWifi();
   std::vector<String> ipv6Addresses() const;
   void wifiTick();
+  void keepDns4First();
   void startAp();
   void stopAp();
   bool captiveRedirect(AsyncWebServerRequest* req);
@@ -287,6 +293,8 @@ class ESP32WebDash {
   volatile bool apActive_ = false;
   volatile bool staWarned_ = false;
   uint32_t staLostAt_ = 0, staUpAt_ = 0, lastRetry_ = 0;
+  volatile uint32_t dns4_ = 0;   // IPv4 DNS server from DHCP (lwIP byte order), 0 = none
+  bool dnsFixLogged_ = false;
   DNSServer* dns_ = nullptr;
 
   AsyncAuthenticationMiddleware* auth_ = nullptr;
