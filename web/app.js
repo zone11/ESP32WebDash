@@ -161,14 +161,19 @@ function route() {
   const view = $('#view');
   view.replaceChildren();
   view.className = '';
-  if (S.sys && S.sys.mode === 'ap')
-    view.append(el('div', { class: 'banner' }, el('span', null,
-      el('b', null, 'Setup mode. '), 'Enter your WiFi under Settings → Network, save, then restart the device.')));
+  view.append(el('div', { class: 'banner', id: 'setupbanner' }, el('span', null,
+    el('b', null, 'Setup mode. '), 'Enter your WiFi under Settings → Network, save, then restart the device.')));
+  showMode();
   page.render(view);
 }
 
+// The device can enter or leave the setup hotspot at any time, so every /api/system result updates the banner.
+function setSys(s) { S.sys = s; showMode(); return s; }
+function showMode() { const b = $('#setupbanner'); if (b) b.hidden = !(S.sys && S.sys.mode === 'ap'); }
+
 function setOnline(on) {
   S.online = on;
+  if (on) api.req('GET', '/api/system').then(setSys).catch(() => {});
   $('#conn').classList.toggle('off', !on);
   $('#brand').classList.toggle('off', !on);
   $('#view').classList.toggle('stale', !on);
@@ -197,8 +202,8 @@ function vitalTile(def) {
     valRow.append(v, unit);
     if (def.type === 'pwm' || def.max != null) bar = el('i');
   }
-  const span = def.span ?? (def.wrap ? 'full' : null);
-  const tile = el('div', { class: ['vit', def.wrap && 'wrap', span && 'w-' + span, def.size && 'fs-' + def.size].filter(Boolean).join(' ') },
+  const tile = el('div', { class: ['vit', def.wrap && 'wrap', def.size && 'fs-' + def.size].filter(Boolean).join(' '),
+    'data-span': def.span ?? (def.wrap ? 'rest' : 1) },
     el('div', { class: 'k' }, def.icon ? icon(def.icon) : null, el('span', null, def.label)),
     valRow, bar ? el('div', { class: 'b' }, bar) : null, sub);
 
@@ -236,6 +241,26 @@ function vitalTile(def) {
   return { tile, upd };
 }
 
+// Places tiles in schema order. CSS grid alone leaves empty cells without lines and can't span "the rest of the row",
+// so a row that isn't full gets a filler tile. span: a column count, 'full', or 'rest' (rest of the row, at least 2).
+function layoutStrip(strip) {
+  // Count the columns without the old spans: a span wider than the grid adds implicit columns to the count.
+  strip.querySelectorAll('.fill').forEach(f => f.remove());
+  const tiles = [...strip.querySelectorAll('.vit')];
+  tiles.forEach(t => t.style.gridColumn = '');
+  const cols = getComputedStyle(strip).gridTemplateColumns.split(' ').length;
+  const fill = (n, before) => n > 0 && strip.insertBefore(el('div', { class: 'vit fill', style: 'grid-column:span ' + n }), before);
+  let x = 0;
+  for (const t of tiles) {
+    const s = t.dataset.span;
+    const n = s === 'full' ? cols : s === 'rest' ? (cols - x >= 2 ? cols - x : cols) : Math.min(+s || 1, cols);
+    if (x + n > cols) { fill(cols - x, t); x = 0; }
+    t.style.gridColumn = 'span ' + n;
+    x = (x + n) % cols;
+  }
+  fill(x && cols - x, null);
+}
+
 function pageDashboard(view) {
   const sc = S.schema;
   const tiles = (sc.values || []).map(vitalTile);
@@ -250,6 +275,8 @@ function pageDashboard(view) {
     strips.get(g).append(tiles[i].tile);
   });
   view.append(...strips.values());
+  const ro = new ResizeObserver(es => es.forEach(e => layoutStrip(e.target)));
+  strips.forEach(s => ro.observe(s)); cleanup.push(() => ro.disconnect());
 
   const groups = {};
   for (const a of sc.actions || []) (groups[a.group || 'Actions'] ||= []).push(a);
@@ -260,8 +287,8 @@ function pageDashboard(view) {
   }
 
   const info = el('dl', { class: 'kv' });
-  const sys = () => api.req('GET', '/api/system').then(s => info.replaceChildren(
-    ...[['Firmware', s.firmware], ['IP', s.ip], ...ip6(s), ['WiFi', s.ssid + ' (' + s.rssi + ' dBm)'],
+  const sys = () => api.req('GET', '/api/system').then(setSys).then(s => info.replaceChildren(
+    ...[['Firmware', s.firmware], ['WebDash', s.webdash], ['IP', s.ip], ...ip6(s), ['WiFi', s.ssid + ' (' + s.rssi + ' dBm)'],
         ['Uptime', fmtUptime(s.uptime)], ['Free heap', Math.round(s.heap / 1024) + ' KB']]
       .flatMap(([k, v]) => [el('dt', null, k), el('dd', null, v)]))).catch(() => {});
   sys();
@@ -413,7 +440,7 @@ const ip6 = s => (s.ipv6 || []).map((a, i) => [i ? '' : 'IPv6', a]);
 
 function pageSystem(view) {
   const info = el('dl', { class: 'kv' });
-  api.req('GET', '/api/system').then(s => info.replaceChildren(
+  api.req('GET', '/api/system').then(setSys).then(s => info.replaceChildren(
     ...[['Device', s.name], ['Firmware', s.firmware], ['Chip', s.chip], ['MAC', s.mac], ['IP', s.ip], ...ip6(s),
         ['WiFi', s.ssid + ' (' + s.rssi + ' dBm)'], ['Uptime', fmtUptime(s.uptime)],
         ['Heap', Math.round(s.heap / 1024) + ' KB free'], ['PSRAM', Math.round(s.psram / 1024) + ' KB free'],

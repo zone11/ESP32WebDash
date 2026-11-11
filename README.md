@@ -27,7 +27,7 @@ board = esp32-s3-devkitc-1
 board_build.filesystem = littlefs
 board_build.partitions = partitions.csv        ; copy one from partitions/ (see below)
 lib_deps =
-    https://github.com/zone11/ESP32WebDash.git#v0.1.6
+    https://github.com/zone11/ESP32WebDash.git#v0.1.7
 ```
 
 **2. Partition table.** OTA needs two app slots plus a data partition for the UI. Copy the matching file from
@@ -134,11 +134,12 @@ pushed to the browser (default every second).
 Layout on the dashboard:
 - `.group("Climate")`: values with the same group share a titled strip, in the order the groups first appear.
   Values without a group go under **Values**.
-- `.span(2)`: the tile spans 2, 3 or 4 columns; `.span(0)` takes the full row. On narrow screens wide tiles fall
-  back to the full row.
+- Tiles keep the order they were added in. `.span(2)`: the tile spans 2, 3 or 4 columns; `.span(0)` takes the
+  full row. On narrow screens a span is capped at the available columns. A tile that doesn't fit the rest of a
+  row starts a new one; the gap is filled with an empty cell.
 - `.size(ValueSize::Large)`: `Small`, `Medium` (default), `Large`, `XLarge`.
 - `.wrap()` (text only): wraps long text and keeps line breaks, in a smaller reading font; the tile takes the
-  full row unless `.span()` is set. Text that doesn't wrap ends in an ellipsis (full text on hover).
+  rest of the row (a new full row if fewer than 2 columns are left) unless `.span()` is set. Text that doesn't wrap ends in an ellipsis (full text on hover).
 
 ```cpp
 ui.addValue("temp", "Temperature").unit("°C").group("Climate").span(2).size(ValueSize::Large);
@@ -188,7 +189,7 @@ build_flags = -DWEBDASH_IPV6=1
 | POST | `/api/settings/import` | `{"settings":{...}}`; unknown or invalid keys are skipped and reported |
 | POST | `/api/settings/reset` | defaults (WiFi included) |
 | POST | `/api/action/{id}` | queue an action (202) |
-| GET | `/api/system` | firmware, chip, network, memory, filesystem |
+| GET | `/api/system` | firmware, WebDash version (`webdash`), chip, network, memory, filesystem |
 | POST | `/api/system/restart` | |
 | POST | `/api/ota/firmware`, `/api/ota/fs` | multipart upload of `firmware.bin` / `littlefs.bin` |
 | WS | `/ws` | `{"values":{...}}`, `{"log":[...]}`, `{"settings":{...}}`, `{"toast":"..."}` |

@@ -202,6 +202,7 @@ void ESP32WebDash::systemJson(JsonDocument& doc) const {
   doc["name"] = name_;
   doc["hostname"] = hostname();
   doc["firmware"] = firmware_;
+  doc["webdash"] = ESP32WEBDASH_VERSION;
   doc["chip"] = String(ESP.getChipModel()) + " rev" + String(ESP.getChipRevision());
   doc["mac"] = WiFi.macAddress();
   doc["ip"] = WiFi.localIP().toString();

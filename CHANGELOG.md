@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.7
+
+- Dashboard tiles keep the order they were added in (no more reordering to fill gaps). Empty cells at the end of a
+  row are filled, so the lines between rows are complete.
+- `.wrap()` text takes the rest of its row instead of always a new full row.
+- The dashboard status box shows the library version ("WebDash", also `webdash` in `/api/system`,
+  `ESP32WEBDASH_VERSION` in code).
+- Fix: the setup-mode banner stayed on the page after the device had reconnected to WiFi; it now follows the
+  device state.
+
 ## 0.1.6
 
 - Dashboard layout for values: `.group(title)` (titled strips), `.span(cols)` (2–4 columns, 0 = full row),
