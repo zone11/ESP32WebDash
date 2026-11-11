@@ -96,6 +96,7 @@ class Setting {
 
 // ---------------------------------------------------------------- values
 enum class ValueType : uint8_t { Number, Text, State, Led, Pwm, Uptime };
+enum class ValueSize : uint8_t { Medium, Small, Large, XLarge };
 
 class Value {
  public:
@@ -106,6 +107,13 @@ class Value {
   Value& range(double min, double max) { min_ = min; max_ = max; hasRange_ = true; return *this; }
   // Default LED color (#rrggbb). Without it the UI uses the accent color.
   Value& color(const char* hex) { color_ = hex; return *this; }
+  // Dashboard strip the tile belongs to (titled); values without a group go under "Values".
+  Value& group(const char* title) { group_ = title; return *this; }
+  // Columns the tile spans (2..4), 0 = the full row.
+  Value& span(uint8_t cols) { span_ = cols; return *this; }
+  Value& size(ValueSize s) { size_ = s; return *this; }
+  // Text (addLabel): wrap over several lines in a smaller font, full row unless span() is set.
+  Value& wrap(bool on = true) { wrap_ = on; return *this; }
 
   // Thread-safe setters, callable from any task.
   void set(double v);
@@ -125,8 +133,10 @@ class Value {
 
   ESP32WebDash& owner_;
   ValueType type_;
-  String id_, label_, unit_, icon_, color_;
-  uint8_t decimals_ = 255;
+  String id_, label_, unit_, icon_, color_, group_;
+  uint8_t decimals_ = 255, span_ = 1;
+  ValueSize size_ = ValueSize::Medium;
+  bool wrap_ = false;
   bool hasRange_ = false;
   double min_ = 0, max_ = 0;
   bool hasValue_ = false, dirty_ = false;
@@ -325,4 +335,5 @@ class Lock {
 using webdash::ESP32WebDash;
 using webdash::Setting;
 using webdash::Value;
+using webdash::ValueSize;
 using webdash::Action;

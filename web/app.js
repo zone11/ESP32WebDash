@@ -23,7 +23,6 @@ function icon(name, cls = 'ic') {
 }
 
 const ICONS = {
-  logo: '<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12h8M12 8v8"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/>',
   moon: '<path d="M20 15.5A8.5 8.5 0 0 1 8.5 4a8.5 8.5 0 1 0 11.5 11.5z"/>',
   temp: '<path d="M10 13.5V5a2 2 0 1 1 4 0v8.5a4 4 0 1 1-4 0z"/>',
@@ -134,7 +133,7 @@ function shell() {
     el('a', { class: 'skip', href: '#view' }, 'Skip to content'),
     el('div', { class: 'topbar' },
       el('header', null,
-        S.schema.device.logo ? el('img', { class: 'logo', src: S.schema.device.logo, alt: '' }) : icon('logo', 'ic logo'),
+        S.schema.device.logo ? el('img', { class: 'logo', src: S.schema.device.logo, alt: '' }) : null,
         el('h1', { id: 'brand' }, S.schema.device.name),
         el('span', { class: 'conn', id: 'conn', title: 'Connection' }),
         el('span', { class: 'grow' }),
@@ -198,7 +197,8 @@ function vitalTile(def) {
     valRow.append(v, unit);
     if (def.type === 'pwm' || def.max != null) bar = el('i');
   }
-  const tile = el('div', { class: 'vit' },
+  const span = def.span ?? (def.wrap ? 'full' : null);
+  const tile = el('div', { class: ['vit', def.wrap && 'wrap', span && 'w-' + span, def.size && 'fs-' + def.size].filter(Boolean).join(' ') },
     el('div', { class: 'k' }, def.icon ? icon(def.icon) : null, el('span', null, def.label)),
     valRow, bar ? el('div', { class: 'b' }, bar) : null, sub);
 
@@ -226,7 +226,7 @@ function vitalTile(def) {
     } else if (typeof x === 'boolean') {
       off = !x;
     }
-    v.textContent = text; unit.textContent = u;
+    v.textContent = text; v.title = def.wrap ? '' : text; unit.textContent = u;
     valRow.classList.toggle('off', off);
     if (bar && p != null) bar.style.width = p.toFixed(1) + '%';
     sub.textContent = s; sub.hidden = !s;
@@ -242,7 +242,14 @@ function pageDashboard(view) {
   const onVals = vals => tiles.forEach(t => t.upd(vals));
   S.valueListeners.add(onVals); cleanup.push(() => S.valueListeners.delete(onVals));
 
-  view.append(el('div', { class: 'vitals' }, tiles.map(t => t.tile)));
+  // one strip per value group, in order of first appearance
+  const strips = new Map();
+  (sc.values || []).forEach((d, i) => {
+    const g = d.group || 'Values';
+    if (!strips.has(g)) strips.set(g, el('div', { class: 'vitals' }, el('header', null, el('h2', null, g))));
+    strips.get(g).append(tiles[i].tile);
+  });
+  view.append(...strips.values());
 
   const groups = {};
   for (const a of sc.actions || []) (groups[a.group || 'Actions'] ||= []).push(a);

@@ -27,7 +27,7 @@ board = esp32-s3-devkitc-1
 board_build.filesystem = littlefs
 board_build.partitions = partitions.csv        ; copy one from partitions/ (see below)
 lib_deps =
-    https://github.com/zone11/ESP32WebDash.git#v0.1.4
+    https://github.com/zone11/ESP32WebDash.git#v0.1.6
 ```
 
 **2. Partition table.** OTA needs two app slots plus a data partition for the UI. Copy the matching file from
@@ -122,7 +122,7 @@ The IPv6 switch exists only in builds with `-DWEBDASH_IPV6=1`; without the flag 
 | Method | Shown as | Set with |
 |---|---|---|
 | `addValue(id, label)` | number + unit, meter with `.range(min, max)` | `set(double)` |
-| `addLabel(id, label)` | text | `set("text")` |
+| `addLabel(id, label)` | text, one line; `.wrap()` for longer text over several lines | `set("text")` |
 | `addState(id, label)` | on / off | `set(bool)` |
 | `addLed(id, label)` | LED; `.color("#hex")` sets the default color | `set(bool)` or `setLed(on, color, dim)` |
 | `addPwm(id, label, maxRaw)` | duty in % with meter (+ raw/max) | `set(raw)` |
@@ -130,6 +130,20 @@ The IPv6 switch exists only in builds with `-DWEBDASH_IPV6=1`; without the flag 
 
 Modifiers: `.unit()`, `.icon()`, `.decimals()`. Setters are thread-safe and cheap; only changed values are
 pushed to the browser (default every second).
+
+Layout on the dashboard:
+- `.group("Climate")`: values with the same group share a titled strip, in the order the groups first appear.
+  Values without a group go under **Values**.
+- `.span(2)`: the tile spans 2, 3 or 4 columns; `.span(0)` takes the full row. On narrow screens wide tiles fall
+  back to the full row.
+- `.size(ValueSize::Large)`: `Small`, `Medium` (default), `Large`, `XLarge`.
+- `.wrap()` (text only): wraps long text and keeps line breaks, in a smaller reading font; the tile takes the
+  full row unless `.span()` is set. Text that doesn't wrap ends in an ellipsis (full text on hover).
+
+```cpp
+ui.addValue("temp", "Temperature").unit("°C").group("Climate").span(2).size(ValueSize::Large);
+ui.addLabel("event", "Last event").wrap().group("Status");
+```
 
 Icons: `temp`, `hum`, `wifi`, `chip`, `clock`, `bolt`, `gauge`, `power`, `play`, `refresh`, `fan`, `led`,
 `bell`, `dot`, `download`, `upload`, `copy`, `trash`, `wave`, `antenna`, `sliders`, `plug`, `server`.

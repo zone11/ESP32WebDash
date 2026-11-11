@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.6
+
+- Dashboard layout for values: `.group(title)` (titled strips), `.span(cols)` (2–4 columns, 0 = full row),
+  `.size(ValueSize::…)` and `.wrap()` for longer text.
+- Fix: long text values no longer overflow into the neighbouring tiles; they end in an ellipsis.
+- **Look:** one sans font throughout (monospace only in the log console and multi-line fields), a four-step type
+  scale, plain dimmed box titles without the accent square, tabs aligned with the boxes, no placeholder logo
+  when `logo()` isn't set. Ungrouped values now sit under a "Values" title.
+
 ## 0.1.5
 
 - **Behaviour change:** IPv6 is now a build option, off by default. Without `-DWEBDASH_IPV6=1` there is no

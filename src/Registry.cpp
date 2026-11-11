@@ -326,6 +326,7 @@ void ESP32WebDash::schemaJson(JsonDocument& doc) const {
   static const char* SET_TYPES[] = {"bool", "int", "float", "range", "string", "password", "select", "color"};
   static const char* VAL_TYPES[] = {"number", "text", "bool", "led", "pwm", "uptime"};
   static const char* STYLES[] = {nullptr, "pri", "danger"};
+  static const char* SIZES[] = {nullptr, "s", "l", "xl"};
   Lock l(*this);
   doc["device"]["name"] = name_;
   doc["device"]["firmware"] = firmware_;
@@ -341,6 +342,11 @@ void ESP32WebDash::schemaJson(JsonDocument& doc) const {
     if (v->color_.length()) o["color"] = v->color_;
     if (v->decimals_ != 255) o["decimals"] = v->decimals_;
     if (v->hasRange_) { o["min"] = v->min_; o["max"] = v->max_; }
+    if (v->group_.length()) o["group"] = v->group_;
+    if (v->span_ == 0 || v->span_ > 4) o["span"] = "full";
+    else if (v->span_ > 1) o["span"] = v->span_;
+    if (SIZES[(int)v->size_]) o["size"] = SIZES[(int)v->size_];
+    if (v->wrap_) o["wrap"] = true;
   }
 
   JsonArray acts = doc["actions"].to<JsonArray>();

@@ -31,6 +31,7 @@ Value* fan;
 Value* heater;
 Value* loops;
 Value* uptime;
+Value* event;
 
 static volatile uint32_t pumpUntil = 0;
 
@@ -48,6 +49,8 @@ static void controlTask(void*) {
     if (autoWater->asBool() && !pumping && h < threshold->asInt()) {
       pumpUntil = millis() + pumpSeconds->asInt() * 1000UL;
       ui.log('I', "humidity %.1f%% below threshold, pump on", h);
+      event->set(String("Automatic watering started at ") + String(h, 1) + " % humidity (threshold " +
+                 threshold->asInt() + " %), running for " + pumpSeconds->asInt() + " s.");
     }
 
     temp->set(t);
@@ -82,18 +85,26 @@ void setup() {
   interval = &ui.addFloat("interval", "Sensor interval", 1.0, 0.2, 60).step(0.1).unit("s")
                   .onChange([](Setting& s) { ui.log('I', "sensor interval now %.1f s", s.asFloat()); });
 
-  temp = &ui.addValue("temp", "Temperature").unit("°C").decimals(1).icon("temp").range(0, 40);
-  hum = &ui.addValue("hum", "Humidity").unit("%").decimals(0).icon("hum").range(0, 100);
-  pump = &ui.addLed("pump", "Pump").icon("bolt");
-  statusLed = &ui.addLed("status", "Status LED").icon("led");
-  dryAlarm = &ui.addLed("alarm", "Dry alarm").color("#e5484d").icon("bell");
-  fan = &ui.addPwm("fan", "Fan", 1023).icon("fan");
-  heater = &ui.addPwm("heater", "Heater").icon("temp");
-  loops = &ui.addValue("loops", "Control loops").icon("refresh");
-  uptime = &ui.addUptime("uptime", "Uptime").icon("clock");
+  temp = &ui.addValue("temp", "Temperature").unit("°C").decimals(1).icon("temp").range(0, 40).group("Climate")
+              .span(2).size(ValueSize::Large);
+  hum = &ui.addValue("hum", "Humidity").unit("%").decimals(0).icon("hum").range(0, 100).group("Climate")
+             .span(2).size(ValueSize::Large);
+  dryAlarm = &ui.addLed("alarm", "Dry alarm").color("#e5484d").icon("bell").group("Climate");
+  pump = &ui.addLed("pump", "Pump").icon("bolt").group("Outputs");
+  statusLed = &ui.addLed("status", "Status LED").icon("led").group("Outputs");
+  fan = &ui.addPwm("fan", "Fan", 1023).icon("fan").group("Outputs");
+  heater = &ui.addPwm("heater", "Heater").icon("temp").group("Outputs");
+  loops = &ui.addValue("loops", "Control loops").icon("refresh").group("Status");
+  uptime = &ui.addUptime("uptime", "Uptime").icon("clock").group("Status");
+  event = &ui.addLabel("event", "Last event").wrap().group("Status");
+  event->set("No watering yet.");
 
   ui.addAction("pump", "Run pump").help("Waters for the configured duration.").button("Start").icon("play").primary()
-      .run([] { pumpUntil = millis() + pumpSeconds->asInt() * 1000UL; ui.notify("Pump started"); });
+      .run([] {
+        pumpUntil = millis() + pumpSeconds->asInt() * 1000UL;
+        event->set(String("Manual watering started, running for ") + pumpSeconds->asInt() + " s.");
+        ui.notify("Pump started");
+      });
   ui.addAction("calib", "Calibrate sensor").help("Takes about 3 seconds.").button("Calibrate").icon("gauge")
       .run([] { delay(3000); ui.notify("Calibration finished"); });
   ui.addAction("reboot", "Restart").help("Settings are kept.").button("Restart").icon("refresh").confirm().group("Device")
