@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.9
+
+- LEDs can blink: `setLed(on, color, dim, blink)`. The browser blinks the LED 500 ms on and 500 ms off and shows
+  `blinking` instead of `on`. With reduced motion the LED stays lit and the text still says `blinking`. In the
+  JSON it is `{on, color, dim, blink}`.
+- The LED tile no longer shows the color as `#rrggbb` text under the value.
+
 ## 0.1.8
 
 - The System page shows PSRAM only when the board has it and the build enables it, as free / total. It used to

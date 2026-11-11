@@ -4,7 +4,7 @@ A reusable web UI for ESP32 projects (PlatformIO + Arduino). The firmware declar
 actions in a few lines of C++, and a generic web UI renders them, with no HTML per project.
 
 - **Settings** in NVS (survive firmware and UI updates), validated on the device, JSON **export/import** for rollouts
-- **Live values** pushed over WebSocket: numbers with meters, text, on/off, **LED** (color + dim), **PWM** (%)
+- **Live values** pushed over WebSocket: numbers with meters, text, on/off, **LED** (color, dim, blink), **PWM** (%)
 - **Actions** (buttons) run on a worker task and never block the web server or your code
 - **OTA** for firmware and web UI, with a built-in recovery page at `/update`
 - **Setup hotspot** with captive portal when WiFi is unreachable, mDNS (`<hostname>.local`), optional IPv6
@@ -69,6 +69,7 @@ void setup() {
 // anywhere, from any task:
 temp->set(23.4);
 led->setLed(true, "#3fb950", 70);   // on, color, dim %
+led->setLed(true, "#e5484d", -1, true);  // blinking red, no dim level
 fan->set(512);                      // raw duty → shown as 50 %
 if (threshold->asInt() > 50) { /* ... */ }
 ```
@@ -124,7 +125,7 @@ The IPv6 switch exists only in builds with `-DWEBDASH_IPV6=1`; without the flag 
 | `addValue(id, label)` | number + unit, meter with `.range(min, max)` | `set(double)` |
 | `addLabel(id, label)` | text, one line; `.wrap()` for longer text over several lines | `set("text")` |
 | `addState(id, label)` | on / off | `set(bool)` |
-| `addLed(id, label)` | LED; `.color("#hex")` sets the default color | `set(bool)` or `setLed(on, color, dim)` |
+| `addLed(id, label)` | LED; `.color("#hex")` sets the default color | `set(bool)` or `setLed(on, color, dim, blink)` |
 | `addPwm(id, label, maxRaw)` | duty in % with meter (+ raw/max) | `set(raw)` |
 | `addUptime(id, label)` | `3d 4h 17m` | `set(seconds)` |
 

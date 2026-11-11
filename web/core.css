@@ -122,6 +122,8 @@ main>.wide{grid-column:1/-1}
   transition:background .2s,box-shadow .2s}
 .led.on{border-color:transparent;background:color-mix(in srgb,var(--led) calc(var(--lv) * 80% + 20%),var(--card));
   box-shadow:0 0 calc(var(--lv) * 12px) color-mix(in srgb,var(--led) calc(var(--lv) * 70%),transparent)}
+.led.blink{animation:blink 1s step-end infinite}
+@keyframes blink{50%{border-color:var(--line);background:none;box-shadow:none}}
 
 /* key/value list */
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:12.5px}

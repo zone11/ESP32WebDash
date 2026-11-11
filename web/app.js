@@ -180,12 +180,12 @@ function setOnline(on) {
 }
 
 // ---------- dashboard ----------
-// LED value: true/false, a dim level 0..100 (0 = off), or {on, color, dim}.
+// LED value: true/false, a dim level 0..100 (0 = off), or {on, color, dim, blink}.
 function ledState(def, x) {
   if (x == null) return { on: false };
   if (typeof x === 'boolean') return { on: x, color: def.color };
   if (typeof x === 'number') return { on: x > 0, color: def.color, dim: x };
-  return { on: x.on ?? (x.dim == null || x.dim > 0), color: x.color || def.color, dim: x.dim };
+  return { on: x.on ?? (x.dim == null || x.dim > 0), color: x.color || def.color, dim: x.dim, blink: !!x.blink };
 }
 const pct = (x, min, max) => Math.max(0, Math.min(100, (x - min) * 100 / (max - min)));
 
@@ -214,12 +214,13 @@ function vitalTile(def) {
     if (def.type === 'led') {
       const st = ledState(def, x);
       off = !st.on;
-      text = st.on ? 'on' : 'off';
+      // 'blinking' also tells users with reduced motion, where the animation is off.
+      text = st.on ? (st.blink ? 'blinking' : 'on') : 'off';
       u = st.on && st.dim != null ? Math.round(st.dim) + ' %' : '';
       led.classList.toggle('on', st.on);
+      led.classList.toggle('blink', st.on && !!st.blink);
       led.style.setProperty('--led', st.color || 'var(--acc)');
       led.style.setProperty('--lv', st.dim != null ? Math.max(0, Math.min(100, st.dim)) / 100 : 1);
-      s = st.on && st.color ? st.color : '';
     } else if (def.type === 'pwm' && typeof x === 'number') {
       const max = def.max ?? 100;
       p = pct(x, def.min ?? 0, max);

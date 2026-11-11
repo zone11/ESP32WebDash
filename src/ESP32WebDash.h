@@ -23,7 +23,7 @@
 #include <vector>
 
 // Library version, same as library.json (shown in the UI status box).
-#define ESP32WEBDASH_VERSION "0.1.8"
+#define ESP32WEBDASH_VERSION "0.1.9"
 
 // Build with -DWEBDASH_IPV6=1 to add the `ipv6` setting (off by default at runtime too).
 #ifndef WEBDASH_IPV6
@@ -125,8 +125,9 @@ class Value {
   void set(bool on);
   void set(const char* text);
   void set(const String& text) { set(text.c_str()); }
-  // LED with optional color (#rrggbb, nullptr = default) and dim level 0..100 (-1 = none).
-  void setLed(bool on, const char* color = nullptr, int dim = -1);
+  // LED with optional color (#rrggbb, nullptr = default), dim level 0..100 (-1 = none), and
+  // blink (the browser blinks it, 500 ms on and off, while it is on).
+  void setLed(bool on, const char* color = nullptr, int dim = -1, bool blink = false);
 
  private:
   friend class ESP32WebDash;
@@ -144,7 +145,7 @@ class Value {
   double min_ = 0, max_ = 0;
   bool hasValue_ = false, dirty_ = false;
   double num_ = 0;
-  bool on_ = false;
+  bool on_ = false, blink_ = false;
   int dim_ = -1;
   String str_, ledColor_;
 };

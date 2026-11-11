@@ -72,11 +72,11 @@ void Value::set(const char* text) {
   if (hasValue_ && str_ == text) return;
   str_ = text; hasValue_ = dirty_ = true; owner_.markDirty();
 }
-void Value::setLed(bool on, const char* color, int dim) {
+void Value::setLed(bool on, const char* color, int dim, bool blink) {
   Lock l(owner_);
   String c = color ? color : "";
-  if (hasValue_ && on_ == on && ledColor_ == c && dim_ == dim) return;
-  on_ = on; ledColor_ = c; dim_ = dim; hasValue_ = dirty_ = true; owner_.markDirty();
+  if (hasValue_ && on_ == on && ledColor_ == c && dim_ == dim && blink_ == blink) return;
+  on_ = on; ledColor_ = c; dim_ = dim; blink_ = blink; hasValue_ = dirty_ = true; owner_.markDirty();
 }
 
 void Value::toJson(JsonObject obj) const {
@@ -85,12 +85,13 @@ void Value::toJson(JsonObject obj) const {
     case ValueType::Text: obj[id_] = str_; break;
     case ValueType::State: obj[id_] = on_; break;
     case ValueType::Led:
-      if (ledColor_.isEmpty() && dim_ < 0) obj[id_] = on_;
+      if (ledColor_.isEmpty() && dim_ < 0 && !blink_) obj[id_] = on_;
       else {
         JsonObject o = obj[id_].to<JsonObject>();
         o["on"] = on_;
         if (ledColor_.length()) o["color"] = ledColor_;
         if (dim_ >= 0) o["dim"] = dim_;
+        if (blink_) o["blink"] = true;
       }
       break;
     default:
