@@ -23,7 +23,7 @@
 #include <vector>
 
 // Library version, same as library.json (shown in the UI status box).
-#define ESP32WEBDASH_VERSION "0.1.7"
+#define ESP32WEBDASH_VERSION "0.1.8"
 
 // Build with -DWEBDASH_IPV6=1 to add the `ipv6` setting (off by default at runtime too).
 #ifndef WEBDASH_IPV6

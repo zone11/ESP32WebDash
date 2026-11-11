@@ -443,7 +443,8 @@ function pageSystem(view) {
   api.req('GET', '/api/system').then(setSys).then(s => info.replaceChildren(
     ...[['Device', s.name], ['Firmware', s.firmware], ['Chip', s.chip], ['MAC', s.mac], ['IP', s.ip], ...ip6(s),
         ['WiFi', s.ssid + ' (' + s.rssi + ' dBm)'], ['Uptime', fmtUptime(s.uptime)],
-        ['Heap', Math.round(s.heap / 1024) + ' KB free'], ['PSRAM', Math.round(s.psram / 1024) + ' KB free'],
+        ['Heap', Math.round(s.heap / 1024) + ' KB free'],
+        ...(s.psramTotal > 0 ? [['PSRAM', Math.round(s.psram / 1024) + ' / ' + Math.round(s.psramTotal / 1024) + ' KB free']] : []),
         ['Filesystem', Math.round(s.fsUsed / 1024) + ' / ' + Math.round(s.fsTotal / 1024) + ' KB']]
       .flatMap(([k, v]) => [el('dt', null, k), el('dd', null, v ?? '–')]))).catch(toastErr);
 

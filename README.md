@@ -27,7 +27,7 @@ board = esp32-s3-devkitc-1
 board_build.filesystem = littlefs
 board_build.partitions = partitions.csv        ; copy one from partitions/ (see below)
 lib_deps =
-    https://github.com/zone11/ESP32WebDash.git#v0.1.7
+    https://github.com/zone11/ESP32WebDash.git#v0.1.8
 ```
 
 **2. Partition table.** OTA needs two app slots plus a data partition for the UI. Copy the matching file from
@@ -189,7 +189,7 @@ build_flags = -DWEBDASH_IPV6=1
 | POST | `/api/settings/import` | `{"settings":{...}}`; unknown or invalid keys are skipped and reported |
 | POST | `/api/settings/reset` | defaults (WiFi included) |
 | POST | `/api/action/{id}` | queue an action (202) |
-| GET | `/api/system` | firmware, WebDash version (`webdash`), chip, network, memory, filesystem |
+| GET | `/api/system` | firmware, WebDash version (`webdash`), chip, network, memory (`heap` and `psram` free, `psramTotal`, 0 without PSRAM), filesystem |
 | POST | `/api/system/restart` | |
 | POST | `/api/ota/firmware`, `/api/ota/fs` | multipart upload of `firmware.bin` / `littlefs.bin` |
 | WS | `/ws` | `{"values":{...}}`, `{"log":[...]}`, `{"settings":{...}}`, `{"toast":"..."}` |

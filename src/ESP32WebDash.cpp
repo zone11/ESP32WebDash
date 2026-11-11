@@ -216,6 +216,7 @@ void ESP32WebDash::systemJson(JsonDocument& doc) const {
   doc["uptime"] = (uint32_t)(esp_timer_get_time() / 1000000ULL);
   doc["heap"] = ESP.getFreeHeap();
   doc["psram"] = ESP.getFreePsram();
+  doc["psramTotal"] = ESP.getPsramSize(); // 0 without PSRAM or when the build doesn't enable it
   doc["fsUsed"] = LittleFS.usedBytes();
   doc["fsTotal"] = LittleFS.totalBytes();
 }

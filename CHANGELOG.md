@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.8
+
+- The System page shows PSRAM only when the board has it and the build enables it, as free / total. It used to
+  read "0 KB free" without PSRAM. `/api/system` has the new field `psramTotal` (0 without PSRAM).
+
 ## 0.1.7
 
 - Dashboard tiles keep the order they were added in (no more reordering to fill gaps). Empty cells at the end of a
